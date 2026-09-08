@@ -67,15 +67,19 @@ class ContactBook:
         Load contacts from a text file.
 
         Format: one contact per line as 'Name|Phone'.
-        Silently ignores a missing file.
+        Silently ignores a missing file or invalid lines.
         """
         try:
             with open(filename, "r", encoding="utf-8") as f:
                 for line in f:
                     line = line.strip()
                     if not line:
-                        continue
+                        continue  # skip empty lines
+                    if "|" not in line:
+                        continue  # skip malformed lines
                     name, phone = line.split("|", 1)
+                    if not name or not phone:
+                        continue  # skip lines with empty name/phone
                     contact = Contact(name, phone)
                     self.add_contact(contact)
         except FileNotFoundError:
