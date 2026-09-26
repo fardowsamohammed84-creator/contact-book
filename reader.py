@@ -1,6 +1,6 @@
 from contacts import ContactBook
 
-DATA_FILE = "contacts.txt"
+DATA_FILE = "contacts.json"
 
 
 def main() -> None:

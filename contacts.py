@@ -1,3 +1,7 @@
+import json
+from pathlib import Path
+
+
 class Contact:
     """Represent a single contact with a name and phone number."""
 
@@ -52,36 +56,53 @@ class ContactBook:
 
     # ---------- Persistence ----------
 
-    def save_contacts(self, filename: str) -> None:
+    def save_contacts(self, filename: str = "contacts.json") -> None:
         """
-        Save contacts to a text file.
+        Save contacts to a JSON file.
 
-        Format: one contact per line as 'Name|Phone'.
+        Format: list of {"name": "...", "phone": "..."} objects.
         """
-        with open(filename, "w", encoding="utf-8") as f:
-            for contact in self.contacts:
-                f.write(f"{contact.name}|{contact.phone}\n")
+        data = [
+            {"name": contact.name, "phone": contact.phone}
+            for contact in self.contacts
+        ]
+        try:
+            with open(filename, "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=2, ensure_ascii=False)
+        except OSError:
+            # If we can't write, just don't crash the whole program
+            pass
 
-    def load_contacts(self, filename: str) -> None:
+    def load_contacts(self, filename: str = "contacts.json") -> None:
         """
-        Load contacts from a text file.
+        Load contacts from a JSON file.
 
-        Format: one contact per line as 'Name|Phone'.
+        Format: list of {"name": "...", "phone": "..."} objects.
         Silently ignores a missing file or invalid lines.
         """
         try:
             with open(filename, "r", encoding="utf-8") as f:
-                for line in f:
-                    line = line.strip()
-                    if not line:
-                        continue  # skip empty lines
-                    if "|" not in line:
-                        continue  # skip malformed lines
-                    name, phone = line.split("|", 1)
-                    if not name or not phone:
-                        continue  # skip lines with empty name/phone
-                    contact = Contact(name, phone)
-                    self.add_contact(contact)
+                data = json.load(f)
         except FileNotFoundError:
             # No file yet; start with an empty book
-            pass
+            return
+        except (json.JSONDecodeError, OSError):
+            # Corrupt or unreadable file; start fresh
+            return
+
+        if not isinstance(data, list):
+            return
+
+        for item in data:
+            if not isinstance(item, dict):
+                continue
+            name = item.get("name")
+            phone = item.get("phone")
+            if not name or not phone:
+                continue
+            name = str(name).strip()
+            phone = str(phone).strip()
+            if not name or not phone:
+                continue
+            contact = Contact(name, phone)
+            self.add_contact(contact)

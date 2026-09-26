@@ -1,6 +1,6 @@
 from contacts import Contact, ContactBook
 
-DATA_FILE = "contacts.txt"
+DATA_FILE = "contacts.json"
 
 
 def show_contacts(contact_book: ContactBook) -> None:
