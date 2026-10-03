@@ -98,10 +98,18 @@ class ContactBook:
                 continue
             name = item.get("name")
             phone = item.get("phone")
+            #Require both fields to exist
             if not name or not phone:
                 continue
+
+            #Require both fields to be strings
+            if not isinstance(name, str) or not isinstance(phone, str):
+                continue  
+
             name = str(name).strip()
             phone = str(phone).strip()
+
+            #Require both fields to be non-empty after stripping
             if not name or not phone:
                 continue
             contact = Contact(name, phone)
